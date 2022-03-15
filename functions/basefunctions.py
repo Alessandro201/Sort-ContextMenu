@@ -6,6 +6,8 @@ from typing import List, Union
 from string import whitespace
 
 from context_menu import menus
+from timebudget import timebudget
+from tqdm import tqdm
 
 
 def clear_menus():
@@ -18,7 +20,6 @@ def clear_menus():
         pass
 
 
-# todo: I modified it, I need to adapt the other functions because i now return only lists
 def clean_paths(file_paths: List[str]):
     if type(file_paths) == list:
         for index, file_path in enumerate(file_paths):
@@ -40,10 +41,10 @@ def noprint(*args):
     pass
 
 
-def find_files(mainfolder, dest=''):
+def find_files(mainfolder, skip_files_in_main_folder=False):
     paths = []
     for root, dirs, files in os.walk(mainfolder):
-        if root == dest:
+        if skip_files_in_main_folder and root == mainfolder:
             continue
 
         for file in files:
@@ -69,6 +70,28 @@ def findNum(name):
         i = len(name)
 
     return i, num
+
+
+@timebudget
+def find_dest_path_without_conflicts(dict_src_dest: dict):
+    # It's needed to check for redundancies in the names
+    path_analysed = set()
+
+    for src, dest in tqdm(dict_src_dest.items()):
+        basename, filename = os.path.split(dest)
+
+        name, ext = os.path.splitext(filename)
+        i, num = findNum(name)
+
+        while dest in path_analysed or os.path.exists(dest):
+            num += 1
+            dest_name = name[:i] + '(' + str(num) + ')' + ext
+            dest = os.path.join(basename, dest_name)
+
+        path_analysed.add(dest)
+        dict_src_dest[src] = dest
+
+    return dict_src_dest
 
 
 def move(lock, src, dest, prt):
@@ -97,10 +120,10 @@ def make_parent_folders(filepath: Union[str, Path], lock=None):
 
     # todo: think about the lock, where to implement it and if to use it everywhere or not
 
-    if lock:
-        lock.acquire()
-
     try:
+        if lock:
+            lock.acquire()
+
         if type(filepath) == Path:
             os.makedirs(filepath.parent, exist_ok=True)
         else:
