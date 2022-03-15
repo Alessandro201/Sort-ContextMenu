@@ -12,35 +12,13 @@ from Delete import *
 
 # ------------------------------------------------ Extract All -------------------------------------------
 
-@timebudget
-def find_dest_path(paths, dest):
-    finalPaths = {}
-
-    print('Processing the files...\n')
-    for path in tqdm(paths):
-        basename, filename = os.path.split(path)
-
-        name, ext = os.path.splitext(filename)
-        i, num = findNum(name)
-
-        destPath = os.path.join(dest, filename)
-
-        while os.path.exists(destPath) or destPath in finalPaths:
-            num += 1
-            destName = name[:i] + '(' + str(num) + ')' + ext
-            destPath = os.path.join(dest, destName)
-
-        finalPaths[destPath] = path
-
-    return finalPaths
-
 
 @timebudget
 def start_threads(elements: dict):
     futures = []
     lock = RLock()
 
-    with ThreadPoolExecutor(max_workers=100) as executor:
+    with ThreadPoolExecutor(max_workers=500) as executor:
         if len(elements) > 100:
             disable_tqdm = False
             prt = noprint
@@ -48,10 +26,9 @@ def start_threads(elements: dict):
             disable_tqdm = True
             prt = toprint
 
-        print('Loading the threads... :')
-        for destPath in tqdm(elements.keys(), disable=disable_tqdm):
-            path = elements[destPath]
-            th = executor.submit(move, lock, path, destPath, prt)
+        print('\nLoading the threads... :')
+        for file_path, dest_path in tqdm(elements.items(), disable=disable_tqdm):
+            th = executor.submit(move, lock, file_path, dest_path, prt)
             futures.append(th)
 
         if not disable_tqdm:
@@ -60,13 +37,44 @@ def start_threads(elements: dict):
         for th in tqdm(as_completed(futures), disable=disable_tqdm):
             th.result()
 
+        print("Done!")
+
+
+def find_dest_paths(file_paths: List[str], main_dest: str):
+    """
+    Find the destination of each file.
+    """
+
+    # dictionary containing the pair {file_path: dest_path} for each file
+    dict_src_dest = dict()
+
+    for file_path in file_paths:
+        # Find the name of the file and add it to the destination
+        filename = os.path.basename(file_path)
+        dest = os.path.join(main_dest, filename)
+
+        dict_src_dest[file_path] = dest
+
+    return dict_src_dest
+
 
 def extract_all(main_path, main_dest):
     start = time.time()
-    print('Searching all the files... it may take a while...\n')
 
-    files_to_move: list = find_files(main_path, main_dest)
-    dict_src_dest: dict = find_dest_path(files_to_move, main_dest)
+    print(f'Main folder: {main_path}\n')
+
+    print('\nSearching all the files... it may take a while...\n')
+    file_paths: list = find_files(main_path, skip_files_in_main_folder=True)
+    print('Done!')
+
+    print('\nLooking where to move the files...')
+    dict_src_dest: dict = find_dest_paths(file_paths,  main_dest)
+    print('Done!')
+
+    print('\nChecking already existing files...')
+    dict_src_dest: dict = find_dest_path_without_conflicts(dict_src_dest)
+    print('Done!')
+
     start_threads(dict_src_dest)
 
     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
