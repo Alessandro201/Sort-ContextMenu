@@ -122,6 +122,6 @@ def main_del_empty_dirs(main_paths, command_vars=''):
 
 
 if __name__ == "__main__":
-    path = r'C:\Users\Alessandro\Desktop\Test'
+    path = r'Test'
     del_empty_dirs(path)
     print('Done')

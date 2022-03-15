@@ -162,6 +162,6 @@ def join_selected(main_paths, command_vars='', disable_input=False):
 
 
 if __name__ == '__main__':
-    path = [r'C:\Users\Alessandro\Desktop\Test\foto']
+    path = [r'test']
     join_selected(path)
     print('Done')
