@@ -21,7 +21,7 @@ def find_empty_dirs(dirpath):
     This way In dir_to_delete there are not only the empty folders, but also the folders containing only empty folders
     """
 
-    # I choose to use a dictionary instead of a list because of it's ability of instantly accessing a key,
+    # I choose to use a dictionary instead of a list because of its ability of instantly accessing a key,
     # instead of iterating through all elements
     to_delete = list()
 

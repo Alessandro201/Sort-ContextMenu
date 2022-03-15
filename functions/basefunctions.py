@@ -54,7 +54,7 @@ def find_files(mainfolder, skip_files_in_main_folder=False):
     return paths
 
 
-def findNum(name):
+def find_num(name):
     i = name.rfind('(')
     j = name.rfind(')')
 
@@ -81,7 +81,7 @@ def find_dest_path_without_conflicts(dict_src_dest: dict):
         basename, filename = os.path.split(dest)
 
         name, ext = os.path.splitext(filename)
-        i, num = findNum(name)
+        i, num = find_num(name)
 
         while dest in path_analysed or os.path.exists(dest):
             num += 1
@@ -115,7 +115,7 @@ def move(lock, src, dest, prt):
 
 def make_parent_folders(filepath: Union[str, Path], lock=None):
     """
-    Create the parent folders if they do not exists
+    Create the parent folders if they do not exist
     """
 
     # todo: think about the lock, where to implement it and if to use it everywhere or not

@@ -182,7 +182,7 @@ class ThreadedClient:
             if not self.queue.empty():
                 pass
 
-    def endApplication(self):
+    def end_application(self):
         self.running = False
 
 
