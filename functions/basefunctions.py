@@ -5,6 +5,18 @@ from pathlib import Path
 from typing import List, Union
 from string import whitespace
 
+from context_menu import menus
+
+
+def clear_menus():
+    try:
+        menus.removeMenu('SORT', type='DIRECTORY')
+        menus.removeMenu('SORT', type='DIRECTORY_BACKGROUND')
+        menus.removeMenu('SORT', type='FILES')
+    except FileNotFoundError:
+        # It's likely because one of the menus specified above is not implemented
+        pass
+
 
 # todo: I modified it, I need to adapt the other functions because i now return only lists
 def clean_paths(file_paths: List[str]):

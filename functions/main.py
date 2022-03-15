@@ -1,4 +1,4 @@
-from clear import clear
+from basefunctions import clear_menus
 from context_menu import menus
 from Extract import extract_all_inside, extract_all_outside
 from Delete import del_empty_dirs
@@ -7,7 +7,7 @@ from Sort import *
 
 if __name__ == '__main__':
     # CLEAR PREVIOUS MENUS
-    clear()
+    clear_menus()
     print("Previous context menu cleaned")
 
     # SORT CONTEXT MENU
