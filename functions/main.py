@@ -28,6 +28,8 @@ if __name__ == '__main__':
                      menus.ContextCommand('Extract all outside', python=extract_all_outside),
                      menus.ContextCommand('Sort by Extension inside', python=sort_by_ext_inside),
                      menus.ContextCommand('Sort by Extension outside', python=sort_by_ext_outside),
+                     menus.ContextCommand('Sort by Type inside', python=sort_by_type_inside),
+                     menus.ContextCommand('Sort by Type outside', python=sort_by_type_outside),
                      sortcm,
                      menus.ContextCommand('Delete empty directories inside', python=main_del_empty_dirs)])
 
@@ -38,6 +40,7 @@ if __name__ == '__main__':
 
     bgcm.add_items([menus.ContextCommand('Extract all', python=extract_all_inside),
                     menus.ContextCommand('Sort by Extension', python=sort_by_ext_inside),
+                    menus.ContextCommand('Sort by Type', python=sort_by_type_inside),
                     sortcm,
                     menus.ContextCommand('Delete empty directories', python=main_del_empty_dirs)])
 
