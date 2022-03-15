@@ -52,7 +52,7 @@ class AskExtensions(Tk):
 
         delete_button = ttk.Button(single_folder_frame)
         delete_button.configure(text='-', command=lambda: self.delete_folder(folder_number))
-        delete_button.configure(width='2')
+        delete_button.configure(width=2)
         delete_button.grid(row=self.number_of_folders, column=0)
 
         folder_label = ttk.Label(single_folder_frame)
@@ -180,7 +180,7 @@ class ThreadedClient:
             # thing.
             sleep(50)
             if not self.queue.empty():
-                self.
+                pass
 
     def endApplication(self):
         self.running = False
