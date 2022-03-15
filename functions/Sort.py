@@ -11,7 +11,14 @@ from basefunctions import *
 from Delete import *
 from Extract import *
 
-import basefunctions
+FILE_TYPES = {
+    'Video': {'mp4', 'wmv', 'mkv', 'mpeg', 'webm', 'flv', 'avi'},
+    'Documents': {'txt', 'docx', 'doc', 'ppt', 'pdf', 'latex'},
+    'Music': {'wav', 'mp3', 'flac', 'ogg', 'aac', 'opus', 'm4a'},
+    'Images': {'jpg', 'jpeg', 'png', 'raw', 'dng', 'nef'},
+    'Archives': {'rar', 'zip', '7z', '7zip', 'tar', 'gz'},
+    'Executables': {'exe', 'sh', 'msi', 'apk', 'pkg'},
+}
 
 
 ########## BASE FUNCTIONS ################
@@ -20,126 +27,27 @@ def start_threads(dict_src_dest: Dict[Path, Path]):
     futures = list()
     lock = RLock()
 
-    with ThreadPoolExecutor(max_workers=100) as executor:
+    with ThreadPoolExecutor(max_workers=500) as executor:
         if len(dict_src_dest) > 100:
-            dis = False
-            prt = basefunctions.noprint
+            disable_tqdm = False
+            prt = noprint
         else:
-            dis = True
-            prt = basefunctions.toprint
+            disable_tqdm = True
+            prt = toprint
 
-        print('Loading the threads... :')
-        for src, dest in tqdm(dict_src_dest.items(), disable=dis):
+        print('\nStarting the threads... :')
+        for src, dest in tqdm(dict_src_dest.items(), disable=disable_tqdm):
             make_parent_folders(dest, lock)
 
             th = executor.submit(move, lock, src, dest, prt)
             futures.append(th)
 
-        if not dis:
-            print('\nWaiting for threads to finish... :')
+        if not disable_tqdm:
+            print('\nWaiting for the threads to finish... :')
 
-        for th in tqdm(as_completed(futures), disable=dis):
+        for th in tqdm(as_completed(futures), disable=disable_tqdm):
             th.result()
 
-
-########## OLD CODE TO BE REMOVED - SORT BY EXTENSION #############
-
-# def find_dest_paths_old(file_paths: List[str], dest: str):
-#     """
-#     Find where each file needs to be moved depending on its extension.
-#     The folder structure is preserved.
-#     """
-#
-#     # dictionary containing the pair {file_path: new_path} for each file
-#     dict_src_dest = dict()
-#
-#     # dictionary containing the pair {extension: extension_folder} for every extension found
-#     extensions = dict()
-#
-#     for file_path in file_paths:
-#
-#         # [1:] is needed to remove the dot of the extension
-#         _, ext = os.path.splitext(file_path)
-#         ext = ext[1:]
-#
-#         # Folder which will contain all the files with ext as extension.
-#         # It has the same name of dest but with the ext added
-#         if ext in extensions:
-#             ext_folder: str = extensions[ext]
-#         else:
-#             if ext == '':  # for files like ".bash" and ".inside"
-#                 ext = 'OTHER'
-#             ext_folder: str = dest + ' ' + ext.upper()
-#             extensions[ext] = ext_folder
-#
-#         # Replace dest in the filename with ext_folder
-#         new_path = file_path.replace(dest, ext_folder)
-#
-#         dict_src_dest[file_path] = new_path
-#
-#     return dict_src_dest
-#
-#
-# def sort_by_ext_inside_old(main_paths, command_vars=''):
-#     start = time.time()
-#
-#     main_paths: list = clean_paths(main_paths)
-#     main_path: str = main_paths[0]
-#
-#     print(f"Sorting by extensions the contents of {main_path}")
-#     files = list()
-#     for sub_folder in os.listdir(main_path):
-#         sub_folder_path = os.path.join(main_path, sub_folder)
-#         if os.path.isdir(sub_folder_path):
-#             print(f'\n\n\n########## WORKING ON THE FOLDER: {sub_folder_path} ##########\n')
-#
-#             sort_by_ext(main_path=sub_folder_path)
-#         else:
-#             files.append(sub_folder_path)
-#
-#     # I need to take care of the files which are not in any sub folder
-#
-#     print("Done!")
-#     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-#
-#     del_empty_dirs(main_path)
-#
-#     input('\n\nPress Enter to continue...')
-#
-#
-# def sort_by_ext_outside_old(main_paths, command_vars=''):
-#     start = time.time()
-#
-#     main_path: list = clean_paths(main_paths)
-#     main_path: str = main_path[0]
-#
-#     sort_by_ext(main_path)
-#
-#     del_empty_dirs(main_path)
-#
-#     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-#     input('\n\nPress Enter to continue...')
-#
-#
-# def sort_by_ext_old(main_path):
-#     start = time.time()
-#
-#     main_dest = main_path
-#
-#     print(f'Main folder: {main_path}\n')
-#
-#     print('\nSearching all the files to move, it may take a while...')
-#     file_paths: List[str] = find_files(main_path)
-#     print('Done!')
-#
-#     print('\nLooking where to move the files...')
-#     dict_src_dest: dict = find_dest_paths(file_paths, main_dest)
-#     print('Done!')
-#
-#     start_threads(dict_src_dest)
-#
-#     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-#
 
 ########## SORT BY EXTENSION #############
 
@@ -181,7 +89,6 @@ def find_dest_paths(file_paths: List[str], main_path: str, main_dest: str, main_
     return dict_src_dest
 
 
-# todo: fix
 def sort_by_ext_inside(main_paths, command_vars=''):
     """
     All the files inside main_path (found recursively) will be divided by their extensions
@@ -216,8 +123,6 @@ def sort_by_ext_inside(main_paths, command_vars=''):
     main_dest = main_path
 
     sort_by_ext(main_path, main_dest)
-
-    del_empty_dirs(main_path)
 
     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
     input('\n\nPress Enter to continue...')
@@ -254,8 +159,6 @@ def sort_by_ext_outside(main_paths, command_vars=''):
 
     sort_by_ext(main_path, main_dest, main_folder_name)
 
-    del_empty_dirs(main_path)
-
     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
     input('\n\nPress Enter to continue...')
 
@@ -273,7 +176,156 @@ def sort_by_ext(main_path, main_dest, main_folder_name=''):
     dict_src_dest: dict = find_dest_paths(file_paths, main_path, main_dest, main_folder_name)
     print('Done!')
 
+    print('\nChecking already existing files...')
+    dict_src_dest: dict = find_dest_path_without_conflicts(dict_src_dest)
+    print('Done!')
+
     start_threads(dict_src_dest)
+
+    del_empty_dirs(main_path)
+
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
+
+
+########## SORT BY TYPE #############
+
+
+def find_dest_paths_by_type(file_paths: List[str], main_path: str, main_dest: str, main_folder_name: str = ''):
+    """
+    Find where each file needs to be moved depending on its extension.
+    The folder structure is preserved.
+    """
+
+    # dictionary containing the pair {file_path: new_path} for each file
+    dict_src_dest = dict()
+
+    # dictionary containing the name of the folder {file type: type_folder}
+    folders_by_type = dict()
+
+    # all files, this is needed to check beforehand for name conflicts
+    files_by_type = dict()
+
+    for file_path in file_paths:
+
+        # [1:] is needed to remove the dot of the extension
+        _, ext = os.path.splitext(file_path)
+        ext = ext[1:].lower()
+
+        for file_type, extensions in FILE_TYPES.items():
+            if ext in extensions:
+                f_type = file_type
+                break
+        else:
+            f_type = 'Others'
+
+        if f_type in folders_by_type:
+            dest_folder: str = folders_by_type[f_type]
+        else:
+            dest_folder: str = os.path.join(main_dest, main_folder_name + f_type)
+            folders_by_type[f_type] = dest_folder
+
+        # Replace dest in the filename with ext_folder
+        new_path = file_path.replace(main_path, dest_folder)
+
+        dict_src_dest[file_path] = new_path
+
+    return dict_src_dest
+
+
+def sort_by_type_inside(main_paths, command_vars=''):
+    """
+    All the files inside main_path (found recursively) will be divided by their extensions
+    preserving the folder structure.
+
+    Ex:
+        main:
+            - file_main1.txt
+            - folder1
+                - file_inside1.txt
+                - file_inside2.mp3
+
+    main_path = main
+
+    Result:
+        main:
+            - TXT
+                - file_main1.txt
+                - folder1
+                    - file_inside1.txt
+            - MP3
+                - folder1
+                    - file_inside2.mp3
+
+    """
+
+    start = time.time()
+
+    main_path: list = clean_paths(main_paths)
+    main_path: str = main_path[0]
+
+    main_dest = main_path
+
+    sort_by_type(main_path, main_dest)
+
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
+    input('\n\nPress Enter to continue...')
+
+
+def sort_by_type_outside(main_paths, command_vars=''):
+    """
+    Ex:
+        main:
+            - file_main1.txt
+            - folder1
+                - file_inside1.txt
+                - file_inside2.mp3
+
+    main_path = folder1
+
+    Result:
+        main:
+            - file_main1.txt
+            - folder1 TXT
+                - file_inside1.txt
+            - folder1 MP3
+                - file_inside2.mp3
+
+    """
+
+    start = time.time()
+
+    main_path: list = clean_paths(main_paths)
+    main_path: str = main_path[0]
+
+    main_dest = Path(main_path).parent
+    main_folder_name = Path(main_path).name + ' '
+
+    sort_by_type(main_path, main_dest, main_folder_name)
+
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
+    input('\n\nPress Enter to continue...')
+
+
+def sort_by_type(main_path, main_dest, main_folder_name=''):
+    start = time.time()
+
+    print(f'Main folder: {main_path}\n')
+
+    print('\nSearching all the files to move, it may take a while...')
+    file_paths: List[str] = find_files(main_path)
+    print('Done!')
+
+    print('\nLooking where to move the files...')
+    dict_src_dest: dict = find_dest_paths_by_type(file_paths, main_path, main_dest, main_folder_name)
+    print('Done!')
+
+    print('\nChecking already existing files...')
+    dict_src_dest = find_dest_path_without_conflicts(dict_src_dest)
+    print('Done!')
+
+    start_threads(dict_src_dest)
+
+    del_empty_dirs(main_path)
 
     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
 
@@ -317,6 +369,8 @@ def sort_by_modification_date(main_path: str, strftime: str):
 
     main_dest = main_path
 
+    print(f'Main folder: {main_path}\n')
+
     print('\nSearching all the files to move, it may take a while...')
     file_paths: List[str] = find_files(main_path)
     print('Done!')
@@ -325,7 +379,13 @@ def sort_by_modification_date(main_path: str, strftime: str):
     dict_src_dest: dict = find_dest_paths_by_modification_date(file_paths, main_dest, strftime)
     print('Done!')
 
+    print('\nChecking already existing files...')
+    dict_src_dest = find_dest_path_without_conflicts(dict_src_dest)
+    print('Done!')
+
     start_threads(dict_src_dest)
+
+    del_empty_dirs(main_path)
 
     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
 
@@ -336,11 +396,7 @@ def sort_by_modification_date_ymd(main_paths: list, command_vars=''):
     main_path: list = clean_paths(main_paths)
     main_path: str = main_path[0]
 
-    print(f'Main folder: {main_path}\n')
-
     sort_by_modification_date(main_path, "%Y:%m:%d")
-
-    del_empty_dirs(main_path)
 
     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
     input('\n\nPress Enter to continue...')
@@ -352,11 +408,7 @@ def sort_by_modification_date_ym(main_paths: list, command_vars=''):
     main_path: list = clean_paths(main_paths)
     main_path: str = main_path[0]
 
-    print(f'Main folder: {main_path}\n')
-
     sort_by_modification_date(main_path, "%Y:%m")
-
-    del_empty_dirs(main_path)
 
     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
     input('\n\nPress Enter to continue...')
@@ -368,17 +420,28 @@ def sort_by_modification_date_y(main_paths: list, command_vars=''):
     main_path: list = clean_paths(main_paths)
     main_path: str = main_path[0]
 
-    print(f'Main folder: {main_path}\n')
-
     sort_by_modification_date(main_path, "%Y")
-
-    del_empty_dirs(main_path)
 
     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
     input('\n\nPress Enter to continue...')
 
 
 ########## SORT BY ACQUISITION DATE #############
+
+def replace_destination(dict_src_dest: dict[str: str], main_path: str, new_dest: Path):
+    """
+    Change the destination of the files. The structure is preserved but instead of being inside the main_path
+    they are moved to another path, usually to avoid conflicts and messing up of the folder structure.
+
+    """
+    new_dest = str(new_dest)
+
+    for src, dest in tqdm(dict_src_dest.items()):
+        dest.replace(main_path, new_dest)
+        dict_src_dest[src] = dest
+
+    return dict_src_dest
+
 
 def find_dest_paths_by_acquisition_date(file_paths: List[str], dest: str, strftime: str):
     """
@@ -408,7 +471,6 @@ def find_dest_paths_by_acquisition_date(file_paths: List[str], dest: str, strfti
 
         # If the acquisition date is not present then skip to the next image
         else:
-
             continue
 
         if acquisition_time_str in dates:
@@ -431,6 +493,8 @@ def sort_by_acquisition_date(main_path: str, strftime: str):
 
     main_dest = main_path
 
+    print(f'Main folder: {main_path}\n')
+
     print('\nSearching all the files to move, it may take a while...')
     file_paths: List[str] = find_files(main_path)
     print('Done!')
@@ -439,7 +503,25 @@ def sort_by_acquisition_date(main_path: str, strftime: str):
     dict_src_dest: dict = find_dest_paths_by_acquisition_date(file_paths, main_dest, strftime)
     print('Done!')
 
+    if not dict_src_dest:
+        print("Unfortunately no file was found with an acquisition date."
+              "\nExiting...")
+        return
+
+    elif len(dict_src_dest) != len(file_paths):
+        print(f"\nUnfortunatly only {len(dict_src_dest)}/{len(file_paths)} files have an acquisition date. "
+              f"\nTo avoid them from tampering with already existing folders, I'll be moving them inside "
+              f'"./acquisition sorted/"')
+        dict_src_dest = replace_destination(dict_src_dest, main_path, Path("./acquisition sorted/").resolve())
+        print("Done")
+
+    print('\nChecking already existing files...')
+    dict_src_dest = find_dest_path_without_conflicts(dict_src_dest)
+    print('Done!')
+
     start_threads(dict_src_dest)
+
+    del_empty_dirs(main_path)
 
     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
 
@@ -450,11 +532,7 @@ def sort_by_acquisition_date_ymd(main_paths: list, command_vars=''):
     main_path: list = clean_paths(main_paths)
     main_path: str = main_path[0]
 
-    print(f'Main folder: {main_path}\n')
-
     sort_by_acquisition_date(main_path, "%Y:%m:%d")
-
-    del_empty_dirs(main_path)
 
     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
     input('\n\nPress Enter to continue...')
@@ -466,11 +544,7 @@ def sort_by_acquisition_date_ym(main_paths: list, command_vars=''):
     main_path: list = clean_paths(main_paths)
     main_path: str = main_path[0]
 
-    print(f'Main folder: {main_path}\n')
-
     sort_by_acquisition_date(main_path, "%Y:%m")
-
-    del_empty_dirs(main_path)
 
     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
     input('\n\nPress Enter to continue...')
@@ -482,18 +556,14 @@ def sort_by_acquisition_date_y(main_paths: list, command_vars=''):
     main_path: list = clean_paths(main_paths)
     main_path: str = main_path[0]
 
-    print(f'Main folder: {main_path}\n')
-
     sort_by_acquisition_date(main_path, "%Y")
-
-    del_empty_dirs(main_path)
 
     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
     input('\n\nPress Enter to continue...')
 
 
 if __name__ == '__main__':
-    path = [r'C:\Users\AlessandroUser\Desktop\Foto papa oneplus - Copy\WhatsApp\Media']
+    path = [r'test']
     # sort_by_acquisition_date_ym(path)
     sort_by_ext_inside(path)
     print('Done')
