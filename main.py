@@ -19,9 +19,6 @@ if __name__ == '__main__':
                       menus.ContextCommand('Acquisition date yyyy/mm/dd', python=sort_by_acquisition_date_ymd),
                       menus.ContextCommand('Acquisition date yyyy/mm', python=sort_by_acquisition_date_ym),
                       menus.ContextCommand('Acquisition date yyyy', python=sort_by_acquisition_date_y),
-                      menus.ContextCommand('Media Creation date yyyy/mm/dd',python=sort_by_win_media_creation_date_ymd),
-                      menus.ContextCommand('Media Creation date yyyy/mm', python=sort_by_win_media_creation_date_ym),
-                      menus.ContextCommand('Media Creation date yyyy', python=sort_by_win_media_creation_date_y),
                       menus.ContextCommand('Date written in the name yyyy/mm/dd', python=sort_by_date_in_name_ymd),
                       menus.ContextCommand('Date written in the name yyyy/mm', python=sort_by_date_in_name_ym),
                       menus.ContextCommand('Date written in the name yyyy', python=sort_by_date_in_name_y),
@@ -37,7 +34,8 @@ if __name__ == '__main__':
                      menus.ContextCommand('Sort by Type inside', python=sort_by_type_inside),
                      menus.ContextCommand('Sort by Type outside', python=sort_by_type_outside),
                      sortcm,
-                     menus.ContextCommand('Delete empty directories inside', python=main_del_empty_dirs)])
+                     menus.ContextCommand('Delete empty directories inside', python=main_del_empty_dirs),
+                     ])
 
     dircm.compile()
 
