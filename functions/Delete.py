@@ -1,5 +1,6 @@
 import os
 import time
+import stat
 
 from tqdm import tqdm
 from send2trash import send2trash
@@ -8,8 +9,6 @@ from basefunctions import *
 
 def find_empty_dirs(dirpath):
     """
-    Contextmenus needs a second argument in the functions, but it only gives an empty string
-
     The function search in the folder and adds to a list all the paths of folders that are empty.
 
     walk(folder, topdown=False) search the folder starting from the most nested one.
@@ -23,23 +22,21 @@ def find_empty_dirs(dirpath):
 
     # I choose to use a dictionary instead of a list because of its ability of instantly accessing a key,
     # instead of iterating through all elements
-    to_delete = list()
+    dirs_to_delete = list()
 
     for root, dirs, files in os.walk(dirpath, topdown=False):
         if not files:
             if not dirs:
-                to_delete.append(root)
+                dirs_to_delete.append(root)
             else:
-                check = True
-                for directory in [os.path.join(root, dir) for dir in dirs]:
-                    if directory not in to_delete:
-                        check = False
-                        break
+                dirs_fullpath = [os.path.join(root, directory) for directory in dirs]
 
-                if check:
-                    to_delete.append(root)
+                # If all the directories in root are empty directories (hence to be deleted)
+                # then add it to dirs_to_delete
+                if all(directory in dirs_to_delete for directory in dirs_fullpath):
+                    dirs_to_delete.append(root)
 
-    return to_delete
+    return dirs_to_delete
 
 
 # def send2trash_decorator(file: str, lock):
@@ -65,7 +62,7 @@ def find_empty_dirs(dirpath):
 #         lock.release()
 
 
-def remove_folder(file_path):
+def remove_folder(file_path, first_try=True):
     try:
         os.rmdir(file_path)
         return True
@@ -75,8 +72,23 @@ def remove_folder(file_path):
               f"  - Error: {err}")
 
     except PermissionError as err:
-        print(f"PermissionError in deleting {file_path}"
-              f"  - Error: {err}")
+        if first_try:
+            # Sometimes some folders get a stubborn read-only attribute which inhibits
+            # os.rmdir from removing the directory. Changing the file permission should
+            # do the trick
+
+            # Change folder permissions to 0777:
+            # stat.S_IRWXU Mask for file owner permissions.
+            # stat.S_IRWXG Mask for group permissions.
+            # stat.S_IRWXO Mask for permissions for others (not in group).
+            print(
+                f"PermissionErrors encountered in deleting a folder. Trying to change file permissions on {file_path}")
+            os.chmod(file_path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+            return remove_folder(file_path, first_try=False)
+
+        else:
+            print(f"PermissionError encountered again in deleting {file_path}"
+                  f"  - Error: {err}")
 
     except OSError as err:
         print(f"OSError in deleting {file_path}"
