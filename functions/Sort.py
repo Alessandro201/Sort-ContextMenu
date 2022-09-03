@@ -567,3 +567,312 @@ if __name__ == '__main__':
     # sort_by_acquisition_date_ym(path)
     sort_by_ext_inside(path)
     print('Done')
+
+
+########## SORT BY WINDOWS MEDIA CREATION DATE #############
+
+# todo: Fix descriptions
+def replace_destination(dict_src_dest: dict[str: str], main_path: str, new_dest: Path):
+    """
+    Change the destination of the files. The structure is preserved but instead of being inside the main_path
+    they are moved to another path, usually to avoid conflicts and messing up of the folder structure.
+
+    """
+    new_dest = str(new_dest)
+
+    for src, dest in tqdm(dict_src_dest.items()):
+        dest.replace(main_path, new_dest)
+        dict_src_dest[src] = dest
+
+    return dict_src_dest
+
+
+def find_dest_paths_by_win_media_creation_date(file_paths: List[str], dest: str, strftime: str):
+    """
+    Find where each file needs to be moved depending on its acquisition date.
+
+    """
+
+    import pytz
+    import datetime
+    from win32com.propsys import propsys, pscon
+
+    # dictionary containing the pair {file_path: new_path} for each file
+    dict_src_dest = dict()
+
+    # dictionary containing the pair {date: date_folder} for every date found
+    dates = dict()
+
+    for file_path in tqdm(file_paths):
+        properties = propsys.SHGetPropertyStoreFromParsingName(file_path)
+        # Get datetime
+        media_creation_datetime = properties.GetValue(pscon.PKEY_Media_DateEncoded).GetValue()
+
+        if not isinstance(media_creation_datetime, datetime.datetime):
+            if not media_creation_datetime:
+                # The file does not have any Windows Media Creation Date
+                continue
+
+            # In Python 2, PyWin32 returns a custom time type instead of
+            # using a datetime subclass. It has a Format method for strftime
+            # style formatting, but let's just convert it to datetime:
+            media_creation_datetime = datetime.datetime.fromtimestamp(int(media_creation_datetime))
+            media_creation_datetime = media_creation_datetime.replace(tzinfo=pytz.timezone('UTC'))
+
+        media_creation_datetime_rome = media_creation_datetime.astimezone(pytz.timezone('Europe/Rome'))
+
+        # todo: check Test in caso non worki il strftime dato come argument
+        # media_creation_datetime_rome_str = media_creation_datetime_rome.strftime("%Y:%m:%d %H:%M:%S")
+        media_creation_datetime_rome_str = media_creation_datetime_rome.strftime(strftime)
+
+        if media_creation_datetime_rome_str in dates:
+            new_dest = dates[media_creation_datetime_rome_str]
+        else:
+
+            # todo: Can be quickend and cleaned with pathlib.mkdir(parents=True, exists_ok=True)
+            new_dest = dest
+            for new_folder in media_creation_datetime_rome_str.split(":"):
+                new_dest = os.path.join(new_dest, new_folder)
+
+            dates[media_creation_datetime_rome_str] = new_dest
+
+        filename = os.path.basename(file_path)
+        dict_src_dest[file_path] = os.path.join(new_dest, filename)
+
+    return dict_src_dest
+
+
+def sort_by_win_media_creation_date(main_path: str, strftime: str):
+    start = time.time()
+
+    main_dest = main_path
+
+    print(f'Main folder: {main_path}\n')
+
+    print('\nSearching all the files to move, it may take a while...')
+    file_paths: List[str] = find_files(main_path)
+    print('Done!')
+
+    print('\nLooking where to move the files...')
+    dict_src_dest: dict = find_dest_paths_by_win_media_creation_date(file_paths, main_dest, strftime)
+    print('Done!')
+
+    if not dict_src_dest:
+        print("Unfortunately no file was found with a media creation date."
+              "\nExiting...")
+        return
+
+    elif len(dict_src_dest) != len(file_paths):
+        print(f"\nUnfortunatly only {len(dict_src_dest)}/{len(file_paths)} files have a media creation date. "
+              f"\nTo avoid them from tampering with already existing folders, I'll be moving them inside "
+              f'"./sorted by media creation date/"')
+        dict_src_dest = replace_destination(dict_src_dest, main_path,
+                                            Path("./sorted by media creation date/").resolve())
+        print("Done")
+
+    print('\nChecking already existing files...')
+    dict_src_dest = find_dest_path_without_conflicts(dict_src_dest)
+    print('Done!')
+
+    start_threads(dict_src_dest)
+
+    del_empty_dirs(main_path)
+
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
+
+
+def sort_by_win_media_creation_date_ymd(main_paths: list, command_vars=''):
+    start = time.time()
+
+    main_path: list = clean_paths(main_paths)
+    main_path: str = main_path[0]
+
+    sort_by_win_media_creation_date(main_path, "%Y:%m:%d")
+
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
+    input('\n\nPress Enter to continue...')
+
+
+def sort_by_win_media_creation_date_ym(main_paths: list, command_vars=''):
+    start = time.time()
+
+    main_path: list = clean_paths(main_paths)
+    main_path: str = main_path[0]
+
+    sort_by_win_media_creation_date(main_path, "%Y:%m")
+
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
+    input('\n\nPress Enter to continue...')
+
+
+def sort_by_win_media_creation_date_y(main_paths: list, command_vars=''):
+    start = time.time()
+
+    main_path: list = clean_paths(main_paths)
+    main_path: str = main_path[0]
+
+    sort_by_win_media_creation_date(main_path, "%Y")
+
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
+    input('\n\nPress Enter to continue...')
+
+
+########## SORT BY REGEX IN NAME #############
+
+def replace_destination(dict_src_dest: dict[str: str], main_path: str, new_dest: Path):
+    """
+    Change the destination of the files. The structure is preserved but instead of being inside the main_path
+    they are moved to another path, usually to avoid conflicts and messing up of the folder structure.
+
+    """
+    new_dest = str(new_dest)
+
+    for src, dest in tqdm(dict_src_dest.items()):
+        dest.replace(main_path, new_dest)
+        dict_src_dest[src] = dest
+
+    return dict_src_dest
+
+
+def find_dest_paths_by_date_in_name(file_paths: List[str], dest: str, strftime: str):
+    """
+    Find where each file needs to be moved depending on date written in the name.
+
+    """
+    import re
+
+    # dictionary containing the pair {file_path: new_path} for each file
+    dict_src_dest = dict()
+
+    # dictionary containing the pair {date: date_folder} for every date found
+    dates = dict()
+
+    # Check format %Y%m%d_%H%M%S with some variations in between. If it fails try to find only the date without
+    # the time
+    POSSIBLE_REGEX = [re.compile('([1-2]\d\d\d)-?([0-1]\d)-?([0-3]\d)[_\-: ]?([0-2]\d):?([0-6]\d):?([0-6]\d)'),
+                      re.compile('([1-2]\d\d\d)-?([0-1]\d)-?([0-3]\d)')]
+
+    for file_path in tqdm(file_paths):
+
+        # Try subsequently all possible regex patterns. If a match is found then go on, otherwise try the next pattern.
+        # If all patterns have been tried but no match was found then skip this file
+        for regex_pattern in POSSIBLE_REGEX:
+            date_match = regex_pattern.search(os.path.basename(file_path))
+
+            if date_match:
+                break
+
+        if not date_match:
+            continue
+
+        # This part that seems unnecessary allows this function to be a bit more generic and be called
+        # by sort_by_date_in_name_* functions with their own strftime, while at the same time
+        # Preserving the power of regex that strptime doesn't have.
+        if len(date_match.groups()) == 6:
+            year, month, day, hour, minutes, seconds = date_match.groups()
+            creation_date_str = f'{year}-{month}-{day}_{hour}:{minutes}:{seconds}'
+            creation_date_struct_object = time.strptime(creation_date_str, '%Y-%m-%d_%H:%M:%S')
+        else:
+            year, month, day = date_match.groups()
+            creation_date_str = f'{year}-{month}-{day}'
+            creation_date_struct_object = time.strptime(creation_date_str, '%Y-%m-%d')
+
+        creation_date_str = time.strftime(strftime, creation_date_struct_object)
+
+        if creation_date_str in dates:
+            new_dest = dates[creation_date_str]
+        else:
+
+            # todo: Can be quickend and cleaned with pathlib.mkdir(parents=True, exists_ok=True)
+            new_dest = dest
+            for new_folder in creation_date_str.split(":"):
+                new_dest = os.path.join(new_dest, new_folder)
+
+            dates[creation_date_str] = new_dest
+
+        filename = os.path.basename(file_path)
+        dict_src_dest[file_path] = os.path.join(new_dest, filename)
+
+    return dict_src_dest
+
+
+def sort_by_date_in_name(main_path: str, strftime: str):
+    start = time.time()
+
+    main_dest = main_path
+
+    print(f'Main folder: {main_path}\n')
+
+    print('\nSearching all the files to move, it may take a while...')
+    file_paths: List[str] = find_files(main_path)
+    print('Done!')
+
+    print('\nLooking where to move the files...')
+    dict_src_dest: dict = find_dest_paths_by_date_in_name(file_paths, main_dest, strftime)
+    print('Done!')
+
+    if not dict_src_dest:
+        print("Unfortunately no file was found with a media creation date."
+              "\nExiting...")
+        return
+
+    elif len(dict_src_dest) != len(file_paths):
+        print(f"\nUnfortunatly only {len(dict_src_dest)}/{len(file_paths)} files have a media creation date. "
+              f"\nTo avoid them from tampering with already existing folders, I'll be moving them inside "
+              f'"./sorted by media creation date/"')
+        dict_src_dest = replace_destination(dict_src_dest, main_path,
+                                            Path("./sorted by media creation date/").resolve())
+        print("Done")
+
+    print('\nChecking already existing files...')
+    dict_src_dest = find_dest_path_without_conflicts(dict_src_dest)
+    print('Done!')
+
+    start_threads(dict_src_dest)
+
+    del_empty_dirs(main_path)
+
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
+
+
+def sort_by_date_in_name_ymd(main_paths: list, command_vars=''):
+    start = time.time()
+
+    main_path: list = clean_paths(main_paths)
+    main_path: str = main_path[0]
+
+    sort_by_date_in_name(main_path, "%Y:%m:%d")
+
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
+    input('\n\nPress Enter to continue...')
+
+
+def sort_by_date_in_name_ym(main_paths: list, command_vars=''):
+    start = time.time()
+
+    main_path: list = clean_paths(main_paths)
+    main_path: str = main_path[0]
+
+    sort_by_date_in_name(main_path, "%Y:%m")
+
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
+    input('\n\nPress Enter to continue...')
+
+
+def sort_by_date_in_name_y(main_paths: list, command_vars=''):
+    start = time.time()
+
+    main_path: list = clean_paths(main_paths)
+    main_path: str = main_path[0]
+
+    sort_by_date_in_name(main_path, "%Y")
+
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
+    input('\n\nPress Enter to continue...')
+
+
+if __name__ == '__main__':
+    path = [r'test']
+    # sort_by_acquisition_date_ym(path)
+    sort_by_ext_inside(path)
+    print('Done')

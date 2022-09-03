@@ -5,7 +5,6 @@ from functions.Extract import extract_all_inside, extract_all_outside
 from functions.Delete import del_empty_dirs
 from functions.Sort import *
 
-
 if __name__ == '__main__':
     # CLEAR PREVIOUS MENUS
     clear_menus()
@@ -19,7 +18,13 @@ if __name__ == '__main__':
                       menus.ContextCommand('Modification date yyyy', python=sort_by_modification_date_y),
                       menus.ContextCommand('Acquisition date yyyy/mm/dd', python=sort_by_acquisition_date_ymd),
                       menus.ContextCommand('Acquisition date yyyy/mm', python=sort_by_acquisition_date_ym),
-                      menus.ContextCommand('Acquisition date yyyy', python=sort_by_acquisition_date_y)
+                      menus.ContextCommand('Acquisition date yyyy', python=sort_by_acquisition_date_y),
+                      menus.ContextCommand('Media Creation date yyyy/mm/dd',python=sort_by_win_media_creation_date_ymd),
+                      menus.ContextCommand('Media Creation date yyyy/mm', python=sort_by_win_media_creation_date_ym),
+                      menus.ContextCommand('Media Creation date yyyy', python=sort_by_win_media_creation_date_y),
+                      menus.ContextCommand('Date written in the name yyyy/mm/dd', python=sort_by_date_in_name_ymd),
+                      menus.ContextCommand('Date written in the name yyyy/mm', python=sort_by_date_in_name_ym),
+                      menus.ContextCommand('Date written in the name yyyy', python=sort_by_date_in_name_y),
                       ])
 
     # DIRECTORY CONTEXT MENU
