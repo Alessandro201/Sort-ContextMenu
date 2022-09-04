@@ -40,10 +40,13 @@ def start_threads(elements: dict):
         print("Done!")
 
 
-def find_dest_paths(file_paths: List[str], main_dest: str):
+def find_dest_paths(file_paths: List[str], main_dest: Union[str, Path]):
     """
     Find the destination of each file.
     """
+
+    # Convert it to string in case it's a pathlib.Path object
+    main_dest = str(main_dest)
 
     # dictionary containing the pair {file_path: dest_path} for each file
     dict_src_dest = dict()
@@ -58,17 +61,32 @@ def find_dest_paths(file_paths: List[str], main_dest: str):
     return dict_src_dest
 
 
-def extract_all(main_path, main_dest):
+def extract_all(main_paths, params=''):
     start = time.time()
 
-    print(f'Main folder: {main_path}\n')
+    main_path = Path(main_paths[0])
+
+    if params == 'inside':
+        # Sort the files inside main_path and keep them there
+        # Ex: parent/main_path -> parent/main_path/JPG, parent/main_path/MP3 ...
+        main_dest = main_path
+
+    elif params == 'outside':
+        # Sort the files inside main_path and move them outside
+        # Ex: parent/main_path -> parent/main_path JPG, parent/main_path MP3 ...
+        main_dest = main_path.parent
+
+    else:
+        raise ValueError(f"The \"params\" is not correct: {params}")
+
+    print(f'EXTRACTING ALL FILES FROM: {main_path}\n')
 
     print('\nSearching all the files... it may take a while...\n')
     file_paths: list = find_files(main_path, skip_files_in_main_folder=True)
     print('Done!')
 
     print('\nLooking where to move the files...')
-    dict_src_dest: dict = find_dest_paths(file_paths,  main_dest)
+    dict_src_dest: dict = find_dest_paths(file_paths, main_dest)
     print('Done!')
 
     print('\nChecking already existing files...')
@@ -76,35 +94,6 @@ def extract_all(main_path, main_dest):
     print('Done!')
 
     start_threads(dict_src_dest)
-
-    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-
-
-def extract_all_outside(main_paths, command_vars=''):
-    start = time.time()
-    print(f"Extracting all files of {main_paths} outside of the folder")
-
-    main_paths: list = clean_paths(main_paths)
-    main_path: str = main_paths[0]
-    main_dest: str = os.path.dirname(main_path)
-
-    extract_all(main_path, main_dest)
-
-    del_empty_dirs(main_path)
-
-    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-    input('\n\nPress Enter to continue...')
-
-
-def extract_all_inside(main_paths, command_vars=''):
-    start = time.time()
-    print(f"Extracting all files of {main_paths} inside the folder")
-
-    main_paths: list = clean_paths(main_paths)
-    main_path: str = main_paths[0]
-    main_dest: str = main_path
-
-    extract_all(main_path, main_dest)
 
     del_empty_dirs(main_path)
 

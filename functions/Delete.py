@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import time
 import stat
 
@@ -100,32 +101,30 @@ def remove_folder(file_path, first_try=True):
 def del_empty_dirs(main_path):
     start = time.time()
 
-    print(f"\nSearching for empty directories to delete in: {main_path}")
-    dirs_to_del = find_empty_dirs(main_path)
+    print(f'SEARCHING FOR EMPTY DIRECTORIES TO DELETE IN: {main_path}\n')
+    dirs_to_delete = find_empty_dirs(main_path)
 
     if not dirs_to_del:
         print(f"No empty folders found! ({time.time() - start:.5f}s taken)")
         return
 
+    print(f"\nDeleting the folders...")
     if len(dirs_to_del) < 100:
-        print(f"\nDeleting the folders...:")
-
-        for dir in dirs_to_del:
+        for directory in dirs_to_delete:
             # Remove the folder and if it succeeded print its name
-            if remove_folder(dir):
-                print(f"\t{dir}")
+            if remove_folder(directory):
+                print(f"\t{directory}")
     else:
-        for dir in tqdm(dirs_to_del):
-            remove_folder(dir)
+        for directory in tqdm(dirs_to_delete):
+            remove_folder(directory)
 
-    print(f"Done! Deleted {len(dirs_to_del)} empty folders! ({time.time() - start:.5f}s taken)")
+    print(f"Done! Deleted {len(dirs_to_delete)} empty folders! ({time.time() - start:.5f}s taken)")
 
 
 def main_del_empty_dirs(main_paths, command_vars=''):
     start = time.time()
 
-    main_path: list = clean_paths(main_paths)
-    main_path: str = main_path[0]
+    main_path = Path(main_paths[0])
 
     del_empty_dirs(main_path)
 

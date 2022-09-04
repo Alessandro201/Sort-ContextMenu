@@ -20,17 +20,6 @@ def clear_menus():
         pass
 
 
-def clean_paths(file_paths: List[str]):
-    if type(file_paths) == list:
-        for index, file_path in enumerate(file_paths):
-            file_path.strip(whitespace + '"')
-            file_paths[index] = file_path
-
-        return file_paths
-    else:
-        raise TypeError(f"Expected a list, obtained a {type(file_paths)}")
-
-
 def toprint(lock, text):
     lock.acquire()
     print(text)
@@ -41,10 +30,10 @@ def noprint(*args):
     pass
 
 
-def find_files(mainfolder, skip_files_in_main_folder=False):
+def find_files(folder_path, skip_files_in_main_folder=False):
     paths = []
-    for root, dirs, files in os.walk(mainfolder):
-        if skip_files_in_main_folder and root == mainfolder:
+    for root, dirs, files in os.walk(folder_path):
+        if skip_files_in_main_folder and root == folder_path:
             continue
 
         for file in files:
@@ -75,7 +64,7 @@ def find_num(name):
 @timebudget
 def find_dest_path_without_conflicts(dict_src_dest: dict):
     # It's needed to check for redundancies in the names
-    path_analysed = set()
+    path_checked = set()
 
     for src, dest in tqdm(dict_src_dest.items()):
         basename, filename = os.path.split(dest)
@@ -83,12 +72,12 @@ def find_dest_path_without_conflicts(dict_src_dest: dict):
         name, ext = os.path.splitext(filename)
         i, num = find_num(name)
 
-        while dest in path_analysed or os.path.exists(dest):
+        while dest in path_checked or os.path.exists(dest):
             num += 1
             dest_name = name[:i] + '(' + str(num) + ')' + ext
             dest = os.path.join(basename, dest_name)
 
-        path_analysed.add(dest)
+        path_checked.add(dest)
         dict_src_dest[src] = dest
 
     return dict_src_dest
