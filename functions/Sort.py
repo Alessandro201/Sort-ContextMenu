@@ -379,12 +379,27 @@ def find_dest_paths_by_modification_date(file_paths: List[str], dest: str, strft
     return dict_src_dest
 
 
-def sort_by_modification_date(main_path: str, strftime: str):
+def sort_by_modification_date(main_paths: list, params: str):
     start = time.time()
 
-    main_dest = main_path
+    # Cleaning of the path to sort
+    main_path: list = clean_paths(main_paths)
+    main_path: str = main_path[0]
 
-    print(f'Main folder: {main_path}\n')
+    # The destination is the same as the source
+    main_dest: str = main_path
+
+    # The string format is passed as params
+    if params == "Y:m:d":
+        strftime: str = "%Y:%m:%d"
+    elif params == "Y:m":
+        strftime: str = "%Y:%m"
+    elif params == "Y":
+        strftime: str = "%Y"
+    else:
+        raise ValueError(f"Wrong strftime. You need to keep it as strftime but without the '%'")
+
+    print(f'SORTING BY FILE MODIFICATION DATE.\n FOLDER TO SORT: {main_path}\n')
 
     print('\nSearching all the files to move, it may take a while...')
     file_paths: List[str] = find_files(main_path)
@@ -401,41 +416,6 @@ def sort_by_modification_date(main_path: str, strftime: str):
     start_threads(dict_src_dest)
 
     del_empty_dirs(main_path)
-
-    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-
-
-def sort_by_modification_date_ymd(main_paths: list, command_vars=''):
-    start = time.time()
-
-    main_path: list = clean_paths(main_paths)
-    main_path: str = main_path[0]
-
-    sort_by_modification_date(main_path, "%Y:%m:%d")
-
-    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-    input('\n\nPress Enter to continue...')
-
-
-def sort_by_modification_date_ym(main_paths: list, command_vars=''):
-    start = time.time()
-
-    main_path: list = clean_paths(main_paths)
-    main_path: str = main_path[0]
-
-    sort_by_modification_date(main_path, "%Y:%m")
-
-    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-    input('\n\nPress Enter to continue...')
-
-
-def sort_by_modification_date_y(main_paths: list, command_vars=''):
-    start = time.time()
-
-    main_path: list = clean_paths(main_paths)
-    main_path: str = main_path[0]
-
-    sort_by_modification_date(main_path, "%Y")
 
     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
     input('\n\nPress Enter to continue...')
@@ -487,12 +467,27 @@ def find_dest_paths_by_acquisition_date(file_paths: List[str], dest: str, strfti
     return dict_src_dest
 
 
-def sort_by_acquisition_date(main_path: str, strftime: str):
+def sort_by_acquisition_date(main_paths: list, params: str):
     start = time.time()
 
-    main_dest = main_path
+    # Cleaning of the path to sort
+    main_path: list = clean_paths(main_paths)
+    main_path: str = main_path[0]
 
-    print(f'Main folder: {main_path}\n')
+    # The destination is the same as the source
+    main_dest: str = main_path
+
+    # The string format is passed as params
+    if params == "Y:m:d":
+        strftime: str = "%Y:%m:%d"
+    elif params == "Y:m":
+        strftime: str = "%Y:%m"
+    elif params == "Y":
+        strftime: str = "%Y"
+    else:
+        raise ValueError(f"Wrong strftime. You need to keep it as strftime but without the '%'")
+
+    print(f'SORTING BY ACQUISITION DATE.\n FOLDER TO SORT: {main_path}\n')
 
     print('\nSearching all the files to move, it may take a while...')
     file_paths: List[str] = find_files(main_path)
@@ -510,8 +505,8 @@ def sort_by_acquisition_date(main_path: str, strftime: str):
     elif len(dict_src_dest) != len(file_paths):
         print(f"\nUnfortunatly only {len(dict_src_dest)}/{len(file_paths)} files have an acquisition date. "
               f"\nTo avoid them from tampering with already existing folders, I'll be moving them inside "
-              f'"./acquisition sorted/"')
-        dict_src_dest = replace_destination(dict_src_dest, main_path, Path("./acquisition sorted/").resolve())
+              f'"./sorted by acquisition date/"')
+        dict_src_dest = replace_destination(dict_src_dest, main_path, Path("./sorted by acquisition date/").resolve())
         print("Done")
 
     print('\nChecking already existing files...')
@@ -521,41 +516,6 @@ def sort_by_acquisition_date(main_path: str, strftime: str):
     start_threads(dict_src_dest)
 
     del_empty_dirs(main_path)
-
-    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-
-
-def sort_by_acquisition_date_ymd(main_paths: list, command_vars=''):
-    start = time.time()
-
-    main_path: list = clean_paths(main_paths)
-    main_path: str = main_path[0]
-
-    sort_by_acquisition_date(main_path, "%Y:%m:%d")
-
-    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-    input('\n\nPress Enter to continue...')
-
-
-def sort_by_acquisition_date_ym(main_paths: list, command_vars=''):
-    start = time.time()
-
-    main_path: list = clean_paths(main_paths)
-    main_path: str = main_path[0]
-
-    sort_by_acquisition_date(main_path, "%Y:%m")
-
-    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-    input('\n\nPress Enter to continue...')
-
-
-def sort_by_acquisition_date_y(main_paths: list, command_vars=''):
-    start = time.time()
-
-    main_path: list = clean_paths(main_paths)
-    main_path: str = main_path[0]
-
-    sort_by_acquisition_date(main_path, "%Y")
 
     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
     input('\n\nPress Enter to continue...')
@@ -577,7 +537,7 @@ def find_dest_paths_by_date_in_name(file_paths: List[str], dest: str, strftime: 
 
     # Check format %Y%m%d_%H%M%S with some variations in between. If it fails try to find only the date without
     # the time
-    POSSIBLE_REGEX = [re.compile('([1-2]\d\d\d)-?([0-1]\d)-?([0-3]\d)[_\-: ]?([0-2]\d):?([0-6]\d):?([0-6]\d)'),
+    POSSIBLE_REGEX = [re.compile('([1-2]\d\d\d)-?([0-1]\d)-?([0-3]\d)[_\-: T]?([0-2]\d):?([0-6]\d):?([0-6]\d)'),
                       re.compile('([1-2]\d\d\d)-?([0-1]\d)-?([0-3]\d)')]
 
     for file_path in tqdm(file_paths):
@@ -624,12 +584,27 @@ def find_dest_paths_by_date_in_name(file_paths: List[str], dest: str, strftime: 
     return dict_src_dest
 
 
-def sort_by_date_in_name(main_path: str, strftime: str):
+def sort_by_date_in_name(main_paths: list, params=''):
     start = time.time()
 
-    main_dest = main_path
+    # Cleaning of the path to sort
+    main_path: list = clean_paths(main_paths)
+    main_path: str = main_path[0]
 
-    print(f'Main folder: {main_path}\n')
+    # The destination is the same as the source
+    main_dest: str = main_path
+
+    # The string format is passed as params
+    if params == "Y:m:d":
+        strftime: str = "%Y:%m:%d"
+    elif params == "Y:m":
+        strftime: str = "%Y:%m"
+    elif params == "Y":
+        strftime: str = "%Y"
+    else:
+        raise ValueError(f"Wrong strftime. You need to keep it as strftime but without the '%'")
+
+    print(f'SORTING BY THE DATE WRITTEN IN THE NAME.\n FOLDER TO SORT: {main_path}\n')
 
     print('\nSearching all the files to move, it may take a while...')
     file_paths: List[str] = find_files(main_path)
@@ -640,16 +615,16 @@ def sort_by_date_in_name(main_path: str, strftime: str):
     print('Done!')
 
     if not dict_src_dest:
-        print("Unfortunately no file was found with a media creation date."
+        print("Unfortunately no file was found with the date written in the title."
               "\nExiting...")
         return
 
     elif len(dict_src_dest) != len(file_paths):
-        print(f"\nUnfortunatly only {len(dict_src_dest)}/{len(file_paths)} files have a media creation date. "
+        print(f"\nUnfortunatly only {len(dict_src_dest)}/{len(file_paths)} files have the date written in the title. "
               f"\nTo avoid them from tampering with already existing folders, I'll be moving them inside "
-              f'"./sorted by media creation date/"')
+              f'"./sorted by title date/"')
         dict_src_dest = replace_destination(dict_src_dest, main_path,
-                                            Path("./sorted by media creation date/").resolve())
+                                            Path("./sorted by title date/").resolve())
         print("Done")
 
     print('\nChecking already existing files...')
@@ -662,40 +637,6 @@ def sort_by_date_in_name(main_path: str, strftime: str):
 
     print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
 
-
-def sort_by_date_in_name_ymd(main_paths: list, command_vars=''):
-    start = time.time()
-
-    main_path: list = clean_paths(main_paths)
-    main_path: str = main_path[0]
-
-    sort_by_date_in_name(main_path, "%Y:%m:%d")
-
-    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-    input('\n\nPress Enter to continue...')
-
-
-def sort_by_date_in_name_ym(main_paths: list, command_vars=''):
-    start = time.time()
-
-    main_path: list = clean_paths(main_paths)
-    main_path: str = main_path[0]
-
-    sort_by_date_in_name(main_path, "%Y:%m")
-
-    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-    input('\n\nPress Enter to continue...')
-
-
-def sort_by_date_in_name_y(main_paths: list, command_vars=''):
-    start = time.time()
-
-    main_path: list = clean_paths(main_paths)
-    main_path: str = main_path[0]
-
-    sort_by_date_in_name(main_path, "%Y")
-
-    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
     input('\n\nPress Enter to continue...')
 
 

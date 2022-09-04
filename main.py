@@ -13,15 +13,17 @@ if __name__ == '__main__':
     # SORT CONTEXT MENU
     sortcm = menus.ContextMenu("Sort by date")
 
-    sortcm.add_items([menus.ContextCommand('Modification date yyyy/mm/dd', python=sort_by_modification_date_ymd),
-                      menus.ContextCommand('Modification date yyyy/mm', python=sort_by_modification_date_ym),
-                      menus.ContextCommand('Modification date yyyy', python=sort_by_modification_date_y),
-                      menus.ContextCommand('Acquisition date yyyy/mm/dd', python=sort_by_acquisition_date_ymd),
-                      menus.ContextCommand('Acquisition date yyyy/mm', python=sort_by_acquisition_date_ym),
-                      menus.ContextCommand('Acquisition date yyyy', python=sort_by_acquisition_date_y),
-                      menus.ContextCommand('Date written in the name yyyy/mm/dd', python=sort_by_date_in_name_ymd),
-                      menus.ContextCommand('Date written in the name yyyy/mm', python=sort_by_date_in_name_ym),
-                      menus.ContextCommand('Date written in the name yyyy', python=sort_by_date_in_name_y),
+    # Windows registry (I think) doesn't allow to have "%" in the params variable.
+    # As such it will be converted inside the function
+    sortcm.add_items([menus.ContextCommand('Modification date yyyy/mm/dd', python=sort_by_modification_date, params="Y:m:d"),
+                      menus.ContextCommand('Modification date yyyy/mm', python=sort_by_modification_date, params="Y:m:d"),
+                      menus.ContextCommand('Modification date yyyy', python=sort_by_modification_date, params="Y:m:d"),
+                      menus.ContextCommand('Acquisition date yyyy/mm/dd', python=sort_by_acquisition_date, params="Y:m:d"),
+                      menus.ContextCommand('Acquisition date yyyy/mm', python=sort_by_acquisition_date, params="Y:m"),
+                      menus.ContextCommand('Acquisition date yyyy', python=sort_by_acquisition_date, params="Y"),
+                      menus.ContextCommand('Date written in the name yyyy/mm/dd', python=sort_by_date_in_name, params="Y:m:d"),
+                      menus.ContextCommand('Date written in the name yyyy/mm', python=sort_by_date_in_name, params="Y:m"),
+                      menus.ContextCommand('Date written in the name yyyy', python=sort_by_date_in_name, params="Y"),
                       ])
 
     # DIRECTORY CONTEXT MENU
