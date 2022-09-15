@@ -104,12 +104,12 @@ def del_empty_dirs(main_path):
     print(f'SEARCHING FOR EMPTY DIRECTORIES TO DELETE IN: {main_path}\n')
     dirs_to_delete = find_empty_dirs(main_path)
 
-    if not dirs_to_del:
+    if not dirs_to_delete:
         print(f"No empty folders found! ({time.time() - start:.5f}s taken)")
         return
 
     print(f"\nDeleting the folders...")
-    if len(dirs_to_del) < 100:
+    if len(dirs_to_delete) < 100:
         for directory in dirs_to_delete:
             # Remove the folder and if it succeeded print its name
             if remove_folder(directory):
