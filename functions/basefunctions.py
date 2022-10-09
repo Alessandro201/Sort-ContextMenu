@@ -61,7 +61,6 @@ def find_num(name):
     return i, num
 
 
-@timebudget
 def find_dest_path_without_conflicts(dict_src_dest: dict):
     # It's needed to check for redundancies in the names
     path_checked = set()
