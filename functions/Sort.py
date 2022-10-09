@@ -418,7 +418,7 @@ def find_dest_paths_by_date_in_name(file_paths: List[str], dest: Union[str, Path
         for regex_pattern in POSSIBLE_REGEX:
             date_match = regex_pattern.search(os.path.basename(file_path))
 
-            if date_match is None:
+            if date_match:
                 break
 
         if not date_match:
