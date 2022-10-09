@@ -2,3 +2,4 @@ exifread~=2.3.2
 tqdm~=4.62.3
 send2trash~=1.8.0
 timebudget~=0.7.1
+context-menu ~= 1.2.3
