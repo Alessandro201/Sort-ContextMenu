@@ -1,6 +1,6 @@
 from context_menu import menus
 
-from functions.basefunctions import clear_menus
+from functions.basefunctions import clear_menus, set_dry_run
 from functions.Extract import extract_all
 from functions.Delete import main_del_empty_dirs
 from functions.Sort import *
@@ -39,6 +39,8 @@ if __name__ == '__main__':
          menus.ContextCommand('Sort by Type outside', python=sort_by_type, params='outside'),
          sortcm,
          menus.ContextCommand('Delete empty directories inside', python=main_del_empty_dirs),
+         menus.ContextCommand('Enable dry run', python=set_dry_run, params='True'),
+         menus.ContextCommand('Disable dry run', python=set_dry_run, params='False')
          ])
 
     dircm.compile()
@@ -47,11 +49,14 @@ if __name__ == '__main__':
     bgcm = menus.ContextMenu('SORT', type='DIRECTORY_BACKGROUND')
 
     bgcm.add_items([
-         menus.ContextCommand('Extract all', python=extract_all, params='inside'),
-         menus.ContextCommand('Sort by Extension', python=sort_by_ext, params='inside'),
-         menus.ContextCommand('Sort by Type', python=sort_by_type, params='inside'),
-         sortcm,
-         menus.ContextCommand('Delete empty directories', python=main_del_empty_dirs)])
+        menus.ContextCommand('Extract all', python=extract_all, params='inside'),
+        menus.ContextCommand('Sort by Extension', python=sort_by_ext, params='inside'),
+        menus.ContextCommand('Sort by Type', python=sort_by_type, params='inside'),
+        sortcm,
+        menus.ContextCommand('Delete empty directories', python=main_del_empty_dirs),
+        menus.ContextCommand('Enable dry run', python=set_dry_run, params='True'),
+        menus.ContextCommand('Disable dry run', python=set_dry_run, params='False')
+    ])
 
     bgcm.compile()
 

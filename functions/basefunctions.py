@@ -61,11 +61,31 @@ def find_num(name):
     return i, num
 
 
+def remove_unnecessary_moves(dict_src_dest: dict):
+    """
+    If the source file is already in the destination folder it doesn't need to be moved, so it's removed.
+    """
+
+    new_dict_src_dest = dict()
+
+    for src, dest in dict_src_dest.items():
+        if not dest == src:
+            new_dict_src_dest[src] = dest
+
+    return new_dict_src_dest
+
+
 def find_dest_path_without_conflicts(dict_src_dest: dict):
     # It's needed to check for redundancies in the names
     path_checked = set()
 
     for src, dest in tqdm(dict_src_dest.items()):
+        # If the source file is already in the destination folder it doesn't need any renaming
+        # It also means that the file exists already, so you don't need to add it to path_checked
+        # because it's caught by os.path.exists()
+        if dest == src:
+            continue
+
         basename, filename = os.path.split(dest)
 
         name, ext = os.path.splitext(filename)
@@ -86,7 +106,7 @@ def move(lock, src, dest, prt):
     try:
         shutil.move(src, dest)
 
-        prt(lock, f'{src} --- moved to destination as --> {dest}')
+        prt(lock, f'{src} \t--> {dest}')
 
     except PermissionError as err:
         lock.acquire()
@@ -106,8 +126,6 @@ def make_parent_folders(filepath: Union[str, Path], lock=None):
     Create the parent folders if they do not exist
     """
 
-    # todo: think about the lock, where to implement it and if to use it everywhere or not
-
     try:
         if lock:
             lock.acquire()
@@ -121,14 +139,50 @@ def make_parent_folders(filepath: Union[str, Path], lock=None):
     except PermissionError as err:
         print(f'You do not have the permission to create all the parent folders of {filepath}\n'
               f'- Error: {err}\n')
+        input("\n\nPress Enter to exit...")
+        sys.exit()
 
     except OSError as err:
         print(f'Error in creating the directory: {filepath}. \n'
               f'- Error: {err}\n')
+        input("\n\nPress Enter to exit...")
+        sys.exit()
 
     except Exception as err:
         print(f'Fatal Exception: {err}\n')
+        input("\n\nPress Enter to exit...")
+        sys.exit()
 
     finally:
         if lock:
             lock.release()
+
+
+def set_dry_run(main_paths: list, params=''):
+
+    main_path = Path(main_paths[0])
+    dry_run = False
+
+    if params.lower() == 'true':
+        dry_run = True
+
+    if dry_run:
+        with open(main_path / 'ENABLE_DRY_RUN', 'w') as f:
+            f.write("ENABLED")
+
+        input("Done! Dry run ENABLED! \nRun the scripts ONLY FROM THIS FOLDER to have the dry run enabled!!!")
+    else:
+        try:
+            os.remove(main_path / "ENABLE_DRY_RUN")
+        except FileNotFoundError:
+            pass
+        except OSError as err:
+            input(f"Error in removing ./ENABLE_DRY_RUN: {err}")
+            sys.exit()
+
+        input("Done! Dry run DISABLED for this folder!")
+
+
+def print_src_dest(files_src_dest: dict):
+    for src, dest in files_src_dest.items():
+        print(f"{src} \t->  {dest}")

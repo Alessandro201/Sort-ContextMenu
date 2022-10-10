@@ -81,7 +81,7 @@ def extract_all(main_paths, params=''):
 
     print(f'EXTRACTING ALL FILES FROM: {main_path}\n')
 
-    print('\nSearching all the files... it may take a while...\n')
+    print('\nSearching all the files... it may take a while...')
     file_paths: list = find_files(main_path, skip_files_in_main_folder=True)
     print('Done!')
 
@@ -89,16 +89,24 @@ def extract_all(main_paths, params=''):
     dict_src_dest: dict = find_dest_paths(file_paths, main_dest)
     print('Done!')
 
-    print('\nChecking already existing files...')
+    print('\nResolving any conflicts and duplicated names...')
+    dict_src_dest: dict = remove_unnecessary_moves(dict_src_dest)
     dict_src_dest: dict = find_dest_path_without_conflicts(dict_src_dest)
     print('Done!')
+
+    ##### DRY RUN ENABLED #####
+    if os.path.exists(main_path / "ENABLE_DRY_RUN"):
+        print_src_dest(dict_src_dest)
+        print(f'\n\nTime Elapsed: {time.time() - start:.5f} seconds')
+        input('Press Enter to continue...')
+        sys.exit()
 
     start_threads(dict_src_dest)
 
     del_empty_dirs(main_path)
 
-    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-    input('\n\nPress Enter to continue...')
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f} seconds')
+    input('Press Enter to continue...')
 
 
 if __name__ == "__main__":

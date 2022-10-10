@@ -101,14 +101,24 @@ def remove_folder(file_path, first_try=True):
 def del_empty_dirs(main_path):
     start = time.time()
 
-    print(f'SEARCHING FOR EMPTY DIRECTORIES TO DELETE IN: {main_path}\n')
+    print(f'\nSearching for empty directories to delete in: {main_path}')
     dirs_to_delete = find_empty_dirs(main_path)
 
     if not dirs_to_delete:
         print(f"No empty folders found! ({time.time() - start:.5f}s taken)")
         return
 
-    print(f"\nDeleting the folders...")
+    ##### DRY RUN ENABLED #####
+    if os.path.exists(main_path / "ENABLE_DRY_RUN"):
+        print(f"Empty directories:")
+        for directory in dirs_to_delete:
+            print(f"{directory}")
+
+        print(f'\n\nTime Elapsed: {time.time() - start:.5f} seconds')
+        input('Press Enter to continue...')
+        sys.exit()
+
+    print(f"Deleting the folders...")
     if len(dirs_to_delete) < 100:
         for directory in dirs_to_delete:
             # Remove the folder and if it succeeded print its name
@@ -128,8 +138,8 @@ def main_del_empty_dirs(main_paths, command_vars=''):
 
     del_empty_dirs(main_path)
 
-    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-    input('\n\nPress Enter to continue...')
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f} seconds')
+    input('Press Enter to continue...')
 
 
 if __name__ == "__main__":

@@ -136,16 +136,24 @@ def sort_by_ext(main_paths, params=''):
     dict_src_dest: dict = find_dest_paths(file_paths, main_path, main_dest, main_path_name)
     print('Done!')
 
-    print('\nChecking already existing files...')
+    print('\nResolving any conflicts and duplicated names...')
+    dict_src_dest: dict = remove_unnecessary_moves(dict_src_dest)
     dict_src_dest: dict = find_dest_path_without_conflicts(dict_src_dest)
     print('Done!')
+
+    ##### DRY RUN ENABLED #####
+    if os.path.exists(main_path / "ENABLE_DRY_RUN"):
+        print_src_dest(dict_src_dest)
+        print(f'\n\nTime Elapsed: {time.time() - start:.5f} seconds')
+        input('Press Enter to continue...')
+        sys.exit()
 
     start_threads(dict_src_dest)
 
     del_empty_dirs(main_path)
 
-    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-    input('\n\nPress Enter to continue...')
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f} seconds')
+    input('Press Enter to continue...')
 
 
 ########## SORT BY TYPE #############
@@ -223,16 +231,24 @@ def sort_by_type(main_paths, params=''):
     dict_src_dest: dict = find_dest_paths_by_type(file_paths, main_path, main_dest, main_path_name)
     print('Done!')
 
-    print('\nChecking already existing files...')
+    print('\nResolving any conflicts and duplicated names...')
+    dict_src_dest: dict = remove_unnecessary_moves(dict_src_dest)
     dict_src_dest = find_dest_path_without_conflicts(dict_src_dest)
     print('Done!')
+
+    ##### DRY RUN ENABLED #####
+    if os.path.exists(main_path / "ENABLE_DRY_RUN"):
+        print_src_dest(dict_src_dest)
+        print(f'\n\nTime Elapsed: {time.time() - start:.5f} seconds')
+        input('Press Enter to continue...')
+        sys.exit()
 
     start_threads(dict_src_dest)
 
     del_empty_dirs(main_path)
 
-    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-    input('\n\nPress Enter to continue...')
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f} seconds')
+    input('Press Enter to continue...')
 
 
 ########## SORT BY MODIFICATION DATE #############
@@ -286,16 +302,24 @@ def sort_by_modification_date(main_paths: list, params: str):
     dict_src_dest: dict = find_dest_paths_by_modification_date(file_paths, main_dest, strftime)
     print('Done!')
 
-    print('\nChecking already existing files...')
+    print('\nResolving any conflicts and duplicated names...')
+    dict_src_dest: dict = remove_unnecessary_moves(dict_src_dest)
     dict_src_dest = find_dest_path_without_conflicts(dict_src_dest)
     print('Done!')
+
+    ##### DRY RUN ENABLED #####
+    if os.path.exists(main_path / "ENABLE_DRY_RUN"):
+        print_src_dest(dict_src_dest)
+        print(f'\n\nTime Elapsed: {time.time() - start:.5f} seconds')
+        input('Press Enter to continue...')
+        sys.exit()
 
     start_threads(dict_src_dest)
 
     del_empty_dirs(main_path)
 
-    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-    input('\n\nPress Enter to continue...')
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f} seconds')
+    input('Press Enter to continue...')
 
 
 ########## SORT BY ACQUISITION DATE #############
@@ -337,60 +361,66 @@ def find_dest_paths_by_acquisition_date(file_paths: List[str], dest: Union[str, 
 
 
 def sort_by_acquisition_date(main_paths: list, params: str):
-    try:
-        start = time.time()
+    start = time.time()
 
-        # The destination is the same as the source
-        main_path = Path(main_paths[0])
-        main_dest = main_path
+    # The destination is the same as the source
+    main_path = Path(main_paths[0])
+    main_dest = main_path
 
-        # The string format is passed as params
-        if params == "Y:m:d":
-            strftime: str = "%Y:%m:%d"
-        elif params == "Y:m":
-            strftime: str = "%Y:%m"
-        elif params == "Y":
-            strftime: str = "%Y"
-        else:
-            raise ValueError(f"Wrong strftime. You need to keep it as strftime but without the '%'")
+    # The string format is passed as params
+    if params == "Y:m:d":
+        strftime: str = "%Y:%m:%d"
+    elif params == "Y:m":
+        strftime: str = "%Y:%m"
+    elif params == "Y":
+        strftime: str = "%Y"
+    else:
+        raise ValueError(f"Wrong strftime. You need to keep it as strftime but without the '%'")
 
-        print(f'SORTING BY ACQUISITION DATE.\n FOLDER TO SORT: {main_path}\n')
+    print(f'SORTING BY ACQUISITION DATE.\n FOLDER TO SORT: {main_path}\n')
 
-        print('\nSearching all the files to move, it may take a while...')
-        file_paths: List[str] = find_files(main_path)
-        print('Done!')
+    print('\nSearching all the files to move, it may take a while...')
+    file_paths: List[str] = find_files(main_path)
+    print('Done!')
 
-        print('\nLooking where to move the files...')
-        dict_src_dest: dict = find_dest_paths_by_acquisition_date(file_paths, main_dest, strftime)
-        print('Done!')
+    print('\nLooking where to move the files...')
+    dict_src_dest: dict = find_dest_paths_by_acquisition_date(file_paths, main_dest, strftime)
+    print('Done!')
 
-        if not dict_src_dest:
-            print("Unfortunately no file was found with an acquisition date.")
-            input('\n\nPress Enter to continue...')
-            sys.exit()
-
-        elif len(dict_src_dest) != len(file_paths):
-            print(f"\nUnfortunatly only {len(dict_src_dest)}/{len(file_paths)} files have an acquisition date. "
-                  f"\nTo avoid them from tampering with already existing folders, I'll be moving them inside "
-                  f'"./sorted by acquisition date/"')
-            new_dest_path = Path("./sorted by acquisition date/").resolve()
-            dict_src_dest = replace_destination(dict_src_dest, main_path, new_dest_path)
-            print("Done")
-
-        input('')
-
-        print('\nChecking already existing files...')
-        dict_src_dest = find_dest_path_without_conflicts(dict_src_dest)
-        print('Done!')
-
-        start_threads(dict_src_dest)
-
-        del_empty_dirs(main_path)
-
-        print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
+    if not dict_src_dest:
+        print("Unfortunately no file was found with an acquisition date.")
         input('\n\nPress Enter to continue...')
-    except Exception as err:
-        print(err)
+        sys.exit()
+
+    elif len(dict_src_dest) != len(file_paths):
+        print(f"\nUnfortunatly only {len(dict_src_dest)}/{len(file_paths)} files have an acquisition date. "
+              f"\nTo avoid them from tampering with already existing folders, I'll be moving them inside "
+              f'"./sorted by acquisition date/"')
+        new_dest_path = Path("./sorted by acquisition date/").resolve()
+        dict_src_dest = replace_destination(dict_src_dest, main_path, new_dest_path)
+        print("Done")
+
+    input('')
+
+    print('\nResolving any conflicts and duplicated names...')
+    dict_src_dest: dict = remove_unnecessary_moves(dict_src_dest)
+    dict_src_dest = find_dest_path_without_conflicts(dict_src_dest)
+    print('Done!')
+
+    ##### DRY RUN ENABLED #####
+    if os.path.exists(main_path / "ENABLE_DRY_RUN"):
+        print_src_dest(dict_src_dest)
+        print(f'\n\nTime Elapsed: {time.time() - start:.5f} seconds')
+        input('Press Enter to continue...')
+        sys.exit()
+
+    start_threads(dict_src_dest)
+
+    del_empty_dirs(main_path)
+
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f} seconds')
+    input('Press Enter to continue...')
+
 
 
 ########## SORT BY REGEX IN NAME #############
@@ -487,16 +517,24 @@ def sort_by_date_in_name(main_paths: list, params=''):
                                             Path("./sorted by title date/").resolve())
         print("Done")
 
-    print('\nChecking already existing files...')
+    print('\nResolving any conflicts and duplicated names...')
+    dict_src_dest: dict = remove_unnecessary_moves(dict_src_dest)
     dict_src_dest = find_dest_path_without_conflicts(dict_src_dest)
     print('Done!')
+
+    ##### DRY RUN ENABLED #####
+    if os.path.exists(main_path / "ENABLE_DRY_RUN"):
+        print_src_dest(dict_src_dest)
+        print(f'\n\nTime Elapsed: {time.time() - start:.5f} seconds')
+        input('Press Enter to continue...')
+        sys.exit()
 
     start_threads(dict_src_dest)
 
     del_empty_dirs(main_path)
 
-    print(f'\n\nTime Elapsed: {time.time() - start:.5f}')
-    input('\n\nPress Enter to continue...')
+    print(f'\n\nTime Elapsed: {time.time() - start:.5f} seconds')
+    input('Press Enter to continue...')
 
 
 if __name__ == '__main__':
