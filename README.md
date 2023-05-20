@@ -100,9 +100,11 @@ In the context menu there are two options `enable dry run` and `disable dry run`
 **YOU MUST RUN THE COMMAND FROM THE SAME FOLDER YOU RUN** `enable dry run`.
 
 ##### Enabling dry mode from the directory background
-![1](https://github.com/Alessandro201/Context-menu-for-directory-organization/assets/61567683/95a0de8b-f3d5-42e9-873e-e8d80717d4bf)
-![2](https://github.com/Alessandro201/Context-menu-for-directory-organization/assets/61567683/6f85427e-1330-4139-9341-6012dfc224db)
+![1](https://github.com/Alessandro201/Sort-ContextMenu/assets/61567683/6ca09dc2-20d0-4228-a1ea-b7eac8afd285)
+![2](https://github.com/Alessandro201/Sort-ContextMenu/assets/61567683/8304fd64-7697-4877-ae12-8a83d427e206)
 
 ##### Enabling dry mode by cliking on a directory
-![3](https://github.com/Alessandro201/Context-menu-for-directory-organization/assets/61567683/64ef7dd1-922b-4240-bc38-5c9d904671d1)
-![4](https://github.com/Alessandro201/Context-menu-for-directory-organization/assets/61567683/9feadd46-87fc-4a1b-af2e-06801fa836a7)
+![4](https://github.com/Alessandro201/Sort-ContextMenu/assets/61567683/7097fb98-8b57-4354-a404-10dcc1523c00)
+![3](https://github.com/Alessandro201/Sort-ContextMenu/assets/61567683/0e21af07-0e07-4263-af3d-408b3f048ea2)
+
+
