@@ -1,16 +1,15 @@
-import time
 import os
+import sys
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from threading import RLock
 from pathlib import Path
+from threading import RLock
 from typing import List, Dict
+
 from tqdm import tqdm
 
-from basefunctions import *
-from Delete import *
-from Extract import *
-
-import basefunctions
+from Delete import del_empty_dirs
+from basefunctions import noprint, toprint, move, find_files
 
 
 def find_union_paths(file_paths: List[str], src_folder: str, dest_folder: str):
@@ -38,10 +37,10 @@ def start_threads(dict_src_dest: Dict[Path, Path]):
     with ThreadPoolExecutor(max_workers=100) as executor:
         if len(dict_src_dest) > 2000:
             dis = False
-            prt = basefunctions.noprint
+            prt = noprint
         else:
             dis = True
-            prt = basefunctions.toprint
+            prt = toprint
 
         print('Loading the threads... :')
         for src, dest in tqdm(dict_src_dest.items(), disable=dis):

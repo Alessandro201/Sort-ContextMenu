@@ -1,16 +1,18 @@
-import time
 import os
 import re
-import exifread
+import sys
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from threading import RLock
 from pathlib import Path
-from typing import List, Dict
+from threading import RLock
+from typing import List, Dict, Union
+
+import exifread
 from tqdm import tqdm
 
-from basefunctions import *
-from Delete import *
-from Extract import *
+from Delete import del_empty_dirs
+from basefunctions import find_dest_path_without_conflicts, print_src_dest
+from basefunctions import make_parent_folders, move, noprint, find_files, remove_unnecessary_moves
 
 FILE_TYPES = {
     'Video': {'mp4', 'wmv', 'mkv', 'mpeg', 'webm', 'flv', 'avi', '3gp'},
@@ -29,24 +31,15 @@ def start_threads(dict_src_dest: Dict[Path, Path]):
     lock = RLock()
 
     with ThreadPoolExecutor(max_workers=500) as executor:
-        if len(dict_src_dest) > 100:
-            disable_tqdm = False
-            prt = noprint
-        else:
-            disable_tqdm = True
-            prt = toprint
-
         print('\nStarting the threads... :')
-        for src, dest in tqdm(dict_src_dest.items(), disable=disable_tqdm):
+        for src, dest in tqdm(dict_src_dest.items()):
             make_parent_folders(dest, lock)
 
-            th = executor.submit(move, lock, src, dest, prt)
+            th = executor.submit(move, lock, src, dest, prt=noprint)
             futures.append(th)
 
-        if not disable_tqdm:
-            print('\nWaiting for the threads to finish... :')
-
-        for th in tqdm(as_completed(futures), disable=disable_tqdm):
+        print('\nWaiting for the threads to finish... :')
+        for th in tqdm(as_completed(futures)):
             th.result()
 
 
@@ -61,8 +54,8 @@ def replace_destination(dict_src_dest: dict[str: str], main_path: Union[str, Pat
     main_path = str(main_path)
     new_dest = str(new_dest)
 
-    for src, dest in tqdm(dict_src_dest.items()):
-        dest.replace(main_path, new_dest)
+    for src, dest in dict_src_dest.items():
+        dest = dest.replace(main_path, new_dest)
         dict_src_dest[src] = dest
 
     return dict_src_dest
@@ -422,7 +415,6 @@ def sort_by_acquisition_date(main_paths: list, params: str):
     input('Press Enter to continue...')
 
 
-
 ########## SORT BY REGEX IN NAME #############
 def find_dest_paths_by_date_in_name(file_paths: List[str], dest: Union[str, Path], strftime: str):
     """
@@ -440,7 +432,6 @@ def find_dest_paths_by_date_in_name(file_paths: List[str], dest: Union[str, Path
                       re.compile('([1-2]\d\d\d)-?([0-1]\d)-?([0-3]\d)')]
 
     for file_path in tqdm(file_paths):
-
         date_match = None
 
         # Try subsequently all possible regex patterns. If a match is found then go on, otherwise try the next pattern.
@@ -540,5 +531,5 @@ def sort_by_date_in_name(main_paths: list, params=''):
 if __name__ == '__main__':
     path = [r'test']
     # sort_by_acquisition_date_ym(path)
-    sort_by_ext_inside(path)
+    # sort_by_ext_inside(path)
     print('Done')
