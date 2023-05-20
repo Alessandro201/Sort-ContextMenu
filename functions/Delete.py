@@ -1,14 +1,13 @@
 import os
-from pathlib import Path
-import time
 import stat
+import sys
+import time
+from pathlib import Path
 
 from tqdm import tqdm
-from send2trash import send2trash
-from basefunctions import *
 
 
-def find_empty_dirs(dirpath):
+def find_empty_dirs(dirpath: Path | str):
     """
     The function search in the folder and adds to a list all the paths of folders that are empty.
 
@@ -63,7 +62,7 @@ def find_empty_dirs(dirpath):
 #         lock.release()
 
 
-def remove_folder(file_path, first_try=True):
+def remove_folder(file_path: Path | str, first_try=True):
     try:
         os.rmdir(file_path)
         return True
@@ -98,7 +97,8 @@ def remove_folder(file_path, first_try=True):
     return False
 
 
-def del_empty_dirs(main_path):
+def del_empty_dirs(main_path: Path | str):
+    main_path = Path(main_path)
     start = time.time()
 
     print(f'\nSearching for empty directories to delete in: {main_path}')

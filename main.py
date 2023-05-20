@@ -1,9 +1,10 @@
 from context_menu import menus
 
-from functions.basefunctions import clear_menus, set_dry_run
-from functions.Extract import extract_all
 from functions.Delete import main_del_empty_dirs
-from functions.Sort import *
+from functions.Extract import extract_all
+from functions.Sort import sort_by_modification_date, sort_by_acquisition_date, sort_by_date_in_name, sort_by_ext
+from functions.Sort import sort_by_type
+from functions.basefunctions import clear_menus, set_dry_run
 
 if __name__ == '__main__':
     # CLEAR PREVIOUS MENUS
@@ -35,8 +36,8 @@ if __name__ == '__main__':
          menus.ContextCommand('Extract all outside', python=extract_all, params='outside'),
          menus.ContextCommand('Sort by Extension inside', python=sort_by_ext, params='inside'),
          menus.ContextCommand('Sort by Extension outside', python=sort_by_ext, params='outside'),
-         menus.ContextCommand('Sort by Type inside', python=sort_by_type, params='inside'),
-         menus.ContextCommand('Sort by Type outside', python=sort_by_type, params='outside'),
+         menus.ContextCommand('Sort by File Type inside', python=sort_by_type, params='inside'),
+         menus.ContextCommand('Sort by File Type outside', python=sort_by_type, params='outside'),
          sortcm,
          menus.ContextCommand('Delete empty directories inside', python=main_del_empty_dirs),
          menus.ContextCommand('Enable dry run', python=set_dry_run, params='True'),
@@ -51,7 +52,7 @@ if __name__ == '__main__':
     bgcm.add_items([
         menus.ContextCommand('Extract all', python=extract_all, params='inside'),
         menus.ContextCommand('Sort by Extension', python=sort_by_ext, params='inside'),
-        menus.ContextCommand('Sort by Type', python=sort_by_type, params='inside'),
+        menus.ContextCommand('Sort by File Type', python=sort_by_type, params='inside'),
         sortcm,
         menus.ContextCommand('Delete empty directories', python=main_del_empty_dirs),
         menus.ContextCommand('Enable dry run', python=set_dry_run, params='True'),
