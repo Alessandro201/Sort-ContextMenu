@@ -107,4 +107,10 @@ In the context menu there are two options `enable dry run` and `disable dry run`
 ![4](https://github.com/Alessandro201/Sort-ContextMenu/assets/61567683/7097fb98-8b57-4354-a404-10dcc1523c00)
 ![3](https://github.com/Alessandro201/Sort-ContextMenu/assets/61567683/0e21af07-0e07-4263-af3d-408b3f048ea2)
 
-
+# Installation
+conda
+```
+conda create -n contextmenu python=3.10
+pip install -r requirements.txt
+python main.py
+```
